@@ -1,5 +1,5 @@
-#ifndef Bureaucrat_HPP
-#define Bureaucrat_HPP
+#ifndef BUREAUCRAT_HPP
+#define BUREAUCRAT_HPP
 #include <iostream>
 #include <exception>
 
@@ -17,12 +17,12 @@ public:
         virtual const char* what() const throw() { return "Grade too low"; }
     };
     Bureaucrat();
-    Bureaucrat(const std::string& name, int grade);
+    Bureaucrat(const std::string n, int g);
     ~Bureaucrat();
     Bureaucrat& operator=(const Bureaucrat& other);
     Bureaucrat(const Bureaucrat& other);
-    const std::string getName() const;
-    int getGrade() const;
+    const std::string getName() const{ return name;};
+    int getGrade() const {return grade;};
     void incrementGrade();
     void decrementGrade();
 };
