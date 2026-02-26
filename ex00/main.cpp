@@ -1,28 +1,12 @@
-#include "stdexcept"
-#include <iostream>
-
-class obj{
-    private:
-        int val ;
-    public :
-        obj(int i) : val(i){}
-        int check(){
-            if (val > 10)
-                throw new std::range_error("error");
-            return 0;
-        }
-};
+#include "Bureaucrat.hpp"
 
 int main(){
-    obj g(11);
     try
     {
-        g.check();
-        
+        Bureaucrat ali("ali", 1);
     }
-    catch(std::range_error * e)
+    catch(const std::exception& e)
     {
-        std::cout<<e->what() << "\n";
+        std::cerr << e.what() << '\n';
     }
-    
 }

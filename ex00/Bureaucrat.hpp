@@ -10,19 +10,19 @@ private:
 public:
     class GradeTooHighException : public std::exception{
     public:
-        virtual const char* what() const throw() { return "Grade too high"; }
+        virtual const char* what() const throw();
     };
     class GradeTooLowException : public std::exception{
     public:
-        virtual const char* what() const throw() { return "Grade too low"; }
+        virtual const char* what() const throw();
     };
     Bureaucrat();
     Bureaucrat(const std::string n, int g);
     ~Bureaucrat();
     Bureaucrat& operator=(const Bureaucrat& other);
     Bureaucrat(const Bureaucrat& other);
-    const std::string getName() const{ return name;};
-    int getGrade() const {return grade;};
+    const std::string getName() const;
+    int getGrade() const;
     void incrementGrade();
     void decrementGrade();
 };
