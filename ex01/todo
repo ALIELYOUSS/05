@@ -1,0 +1,363 @@
+Big Picture: What This Exercise Is Teaching
+
+This exercise trains you to understand:
+
+Exceptions in C++
+
+Const correctness
+
+Encapsulation (private attributes)
+
+Class interaction
+
+Nested exception classes
+
+Operator overloading
+
+Object responsibility design
+
+You are building a small real-world OOP system:
+
+👨‍💼 Bureaucrat
+
+📄 Form
+
+Bureaucrat signs Form
+
+Exceptions control invalid behavior
+
+This is object interaction + error handling.
+
+🧱 STEP 1 — Understand the Form Class Structure
+
+You must create a class Form.
+
+It has 4 attributes:
+
+1️⃣ const std::string name
+
+Once created → can NEVER change.
+
+So it must be initialized in the constructor initializer list.
+
+2️⃣ bool isSigned
+
+Starts as false
+
+Changes to true if signed
+
+3️⃣ const int gradeToSign
+
+Minimum required grade to sign
+
+4️⃣ const int gradeToExecute
+
+Used later (Exercise 02)
+
+Just store it correctly now
+
+⚠️ All attributes must be:
+
+private
+
+NOT protected.
+
+This teaches:
+
+Proper encapsulation.
+
+🧠 STEP 2 — Grade Rules (Very Important)
+
+Grades follow the SAME RULES as Bureaucrat:
+
+Grade 1 → highest
+
+Grade 150 → lowest
+
+So:
+
+Grade	Meaning
+1	strongest
+50	mid
+150	weakest
+
+That means:
+
+If grade < 1 → ❌ GradeTooHighException
+If grade > 150 → ❌ GradeTooLowException
+
+You must check this:
+
+Inside the constructor of Form
+
+Just like you did in Bureaucrat.
+
+🧨 STEP 3 — Nested Exception Classes
+
+Inside Form, you must define:
+
+Form::GradeTooHighException
+Form::GradeTooLowException
+
+They must:
+
+Inherit from std::exception
+
+Override what()
+
+Be non-throwing (throw() in C++98)
+
+This teaches:
+
+Polymorphism + custom exceptions
+
+🏗 STEP 4 — Constructor Logic
+
+When creating a Form:
+
+Initialize all const members
+
+Validate grades
+
+If invalid → throw exception
+
+Set isSigned = false
+
+This teaches:
+
+Constructor validation & object integrity
+
+📤 STEP 5 — Getters
+
+You must create getters for:
+
+getName()
+
+getIsSigned()
+
+getGradeToSign()
+
+getGradeToExecute()
+
+Important:
+
+They must be const
+
+They must not modify the object
+
+This reinforces:
+
+Const correctness
+
+🖨 STEP 6 — Overload operator<<
+
+You must print something like:
+
+Form name: Contract
+Signed: No
+Grade to sign: 50
+Grade to execute: 25
+
+This teaches:
+
+Operator overloading
+Clean class printing
+
+Remember:
+
+It must not modify the object
+
+It must use getters
+
+🖊 STEP 7 — Implement beSigned()
+
+This is the core logic.
+
+Function:
+
+void beSigned(const Bureaucrat& b);
+
+It must:
+
+Compare bureaucrat grade
+
+If bureaucrat grade <= gradeToSign → sign form
+
+Else → throw GradeTooLowException
+
+⚠️ Remember:
+Smaller number = higher power.
+
+So:
+
+If:
+
+bureaucrat.getGrade() <= gradeToSign
+
+→ allowed
+
+Else:
+→ exception
+
+This teaches:
+
+Class collaboration
+Business logic inside the right class
+
+Important design rule:
+Form decides if it can be signed.
+Not the Bureaucrat.
+
+🏛 STEP 8 — Modify Bureaucrat Class
+
+Now add:
+
+void signForm(Form& form);
+
+What it does:
+
+Try calling form.beSigned(*this)
+
+If success → print:
+
+Ali signed Contract
+
+If exception → catch it and print:
+
+Ali couldn’t sign Contract because Grade too low
+
+This teaches:
+
+Try/catch usage
+Delegation of responsibility
+Separation of concerns
+
+Important concept:
+
+Bureaucrat tries
+
+Form decides
+
+Exception explains failure
+
+That’s clean OOP design.
+
+🧪 STEP 9 — What You MUST Test
+
+You must test at least:
+
+✅ Valid form creation
+
+Normal grades
+
+❌ Form grade too high
+
+gradeToSign = 0
+
+❌ Form grade too low
+
+gradeToSign = 151
+
+✅ Bureaucrat signs successfully
+❌ Bureaucrat grade too low to sign
+
+Example test scenarios:
+
+Bureaucrat Grade	Form Required	Expected
+10	20	❌ fail
+20	10	✅ success
+1	1	✅ success
+150	1	❌ fail
+🎯 What This Exercise REALLY Teaches
+
+This is not about forms.
+
+It teaches:
+
+1️⃣ Who owns logic?
+
+Form owns signing rules.
+
+2️⃣ How to design exception flow?
+
+Throw inside low-level class.
+Catch inside high-level class.
+
+3️⃣ How to build safe objects?
+
+Validate in constructor.
+
+4️⃣ Why const matters?
+
+Immutable data = safer objects.
+
+⚠️ Common Student Mistakes
+
+❌ Forgetting initializer list for const members
+❌ Forgetting to validate grades in constructor
+❌ Wrong comparison (grade logic reversed)
+❌ Catching exception inside beSigned() (wrong place)
+❌ Printing inside Form instead of Bureaucrat
+❌ Forgetting const correctness
+❌ Making attributes protected
+
+🧠 Mental Model of the System
+
+Think of it like this:
+
+Bureaucrat -----> Form
+   |                |
+   | tries          | decides
+   |                |
+   catches <--------
+
+Exception travels upward.
+
+This is called:
+
+Stack unwinding
+
+Which you studied earlier.
+
+🚀 After This Exercise You Should Understand
+
+Nested exception classes
+
+Const data members
+
+Constructor validation
+
+Object collaboration
+
+Proper responsibility design
+
+Real OOP thinking
+
+This exercise prepares you for:
+
+Exercise 02 → Executable forms
+Exercise 03 → Inheritance + polymorphism
+
+Which become much more advanced.
+
+🧭 Your Implementation Order (Recommended)
+
+Copy previous ex00
+
+Create Form.hpp
+
+Define attributes
+
+Add constructor + validation
+
+Add nested exceptions
+
+Add getters
+
+Overload operator<<
+
+Implement beSigned()
+
+Modify Bureaucrat with signForm()
+
+Write tests
