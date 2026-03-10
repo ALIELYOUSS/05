@@ -45,13 +45,11 @@ bool Form::isitSigned() const{
 }
 
 const char *Form::GradeTooLowException::what() const throw(){
-    std::cout << "Form grade to sign or to execute too low\n";
-    return NULL;
+    return "Form grade to sign or to execute too low\n";
 }
 
 const char *Form::GradeTooHighException::what() const throw(){
-    std::cout << "Form grade to sign or to execute too high\n";
-    return NULL;
+    return "Form grade to sign or to execute too high\n";
 }
 
 std::ostream& operator<<(std::ostream& os, const Form& b){
