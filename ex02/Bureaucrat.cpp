@@ -1,5 +1,5 @@
-#include "Form.hpp"
 #include "Bureaucrat.hpp"
+#include "AForm.hpp"
 
 Bureaucrat::Bureaucrat() {
     std::cout << "default constructor called\n";
@@ -13,11 +13,8 @@ Bureaucrat::Bureaucrat(const std::string n, int g) : name(n), grade(g){
         throw Bureaucrat::GradeTooLowException();
 }
 
-Bureaucrat::Bureaucrat(const Bureaucrat& other) : name(other.getName()){
+Bureaucrat::Bureaucrat(const Bureaucrat& other) : name(other.getName()), grade(other.getGrade()){
     std::cout << "copy constructor called\n";
-    if (&other != this){
-        this->grade = other.getGrade();
-    }
 }
 
 Bureaucrat& Bureaucrat::operator=(const Bureaucrat& other)
@@ -68,9 +65,13 @@ std::ostream& operator<<(std::ostream& os, const Bureaucrat& b){
     return os;
 }
 
-void Bureaucrat::signaForm(Form& f){
+void Bureaucrat::signForm(AForm& f){
     f.beSigned(*this);
-    if (f.isitSigned())
+    try {
+        f.isitSigned();
         std::cout << name << " signed " << f.getName() << std::endl;
+    }
+    catch (std::exception& e){
+        std::cerr << e.what() << std::endl;
+    }
 }
-

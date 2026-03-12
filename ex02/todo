@@ -1,143 +1,184 @@
 ================================================================================
-                     EX01 — Form up, maggots!
+                  EX02 — No, you need form 28B, not 28C...
 ================================================================================
 
 WHAT THIS EXERCISE COVERS:
-  - Everything from ex00 (Bureaucrat stays the same, + one new method)
-  - A NEW class: Form
-  - Class interaction: Bureaucrat signs a Form
-  - Two separate exception systems (Bureaucrat has its own, Form has its own)
-  - const attributes in a class
-  - beSigned() — a method on Form that takes a Bureaucrat
-  - signForm() — a method on Bureaucrat that takes a Form
-  - CIRCULAR DEPENDENCY between headers (forward declaration)
+  - Abstract classes (AForm replaces Form from ex01)
+  - Pure virtual functions (virtual ... = 0)
+  - Concrete derived classes inheriting from an abstract base
+  - Polymorphism: calling derived execute() through base pointer/reference
+  - File I/O (ShrubberyCreationForm writes to a file)
+  - Bureaucrat::executeForm() — a method that calls form.execute()
+  - Three concrete form classes with hard-coded grade requirements:
+      ShrubberyCreationForm:   sign 145, exec 137 → writes ASCII trees to file
+      RobotomyRequestForm:    sign 72,  exec 45  → 50% chance robotomy
+      PresidentialPardonForm:  sign 25,  exec 5   → pardoned by Zaphod
 
 GRADE SYSTEM REMINDER:
   - Grade 1   = HIGHEST (best)
   - Grade 150 = LOWEST  (worst)
-  - A bureaucrat can sign a form ONLY if his grade <= gradeToSign
-    (lower number = higher authority)
-
-================================================================================
-                    YOUR COMPILE ERROR — EXPLAINED
-================================================================================
-
-  ERROR:
-    Form.hpp:30: error: 'Bureaucrat' does not name a type
-
-  WHY IT HAPPENS:
-    You have a CIRCULAR INCLUDE:
-      Bureaucrat.hpp → #include "Form.hpp"
-      Form.hpp       → #include "Bureaucrat.hpp"
-
-    When the compiler processes main.cpp:
-      1. main.cpp includes Bureaucrat.hpp
-      2. Bureaucrat.hpp includes Form.hpp
-      3. Form.hpp tries to include Bureaucrat.hpp
-      4. But #ifndef BUREAUCRAT_HPP blocks it (already being processed)
-      5. Form.hpp sees "Bureaucrat" in beSigned() → NOT DECLARED YET → ERROR
-
-  HOW TO FIX:
-    In Bureaucrat.hpp:
-      - REMOVE: #include "Form.hpp"
-      - ADD:    class Form;          (this is a "forward declaration")
-
-    A forward declaration says "trust me, Form exists, I'll define it later."
-    This works because signaForm(Form& f) only uses a REFERENCE.
-    For references/pointers, the compiler doesn't need the full class — just
-    the name is enough.
-
-    Form.hpp KEEPS #include "Bureaucrat.hpp" because beSigned() calls
-    b.getGrade() — it needs the FULL class definition.
-
-  CONCEPT TO UNDERSTAND:
-    Forward declaration = "I promise this class exists"
-    #include = "Here is the full class definition"
-    Use forward declaration when you only need a pointer or reference.
-    Use #include when you need to call methods or know the size.
+  - A bureaucrat can SIGN   if grade <= gradeToSign
+  - A bureaucrat can EXECUTE if grade <= gradeToExecute AND form is signed
 
 ================================================================================
                        REMAINING BUGS IN YOUR CODE
 ================================================================================
 
-[BUG 1] COMPILE ERROR — Circular include (see above)
+[BUG 1] AForm.hpp — Wrong include guard: FORM_HPP instead of AFORM_HPP
 --------------------------------------------------------------------------
-  In Bureaucrat.hpp, replace:
-      #include "Form.hpp"
-  With:
-      class Form;
-
-  That's it. One line change fixes the compile error.
-
---------------------------------------------------------------------------
-
-[BUG 2] what() methods don't RETURN anything
---------------------------------------------------------------------------
-  Your Form.cpp has:
-      const char *Form::GradeTooLowException::what() const{
-          std::cout << "Form GradeTosign or to Execute too low\n";
-      }
-
-  PROBLEMS:
-    1. what() must RETURN a const char*, not cout it.
-       The caller decides what to do with the message.
-    2. Missing throw() specifier (required in C++98)
+  Your code:
+      #ifndef FORM_HPP
+      #define FORM_HPP
 
   Should be:
-      const char *Form::GradeTooLowException::what() const throw(){
-          return "Form grade to sign or execute is too low";
+      #ifndef AFORM_HPP
+      #define AFORM_HPP
+
+  You renamed the class to AForm but forgot to update the guard.
+  This could cause subtle issues if another file uses FORM_HPP.
+
+--------------------------------------------------------------------------
+
+[BUG 2] AForm.hpp — Getters and beSigned() should NOT be pure virtual
+--------------------------------------------------------------------------
+  Your code makes ALL methods pure virtual (= 0):
+      virtual int getGradeToExecute() const = 0;
+      virtual int getGradeToSign() const = 0;
+      virtual std::string getName() const = 0;
+      virtual bool isitSigned() const = 0;
+      virtual void beSigned(const Bureaucrat& b) = 0;
+
+  PROBLEM:
+    - These getters access PRIVATE members of AForm. Derived classes
+      can't access them, so they can't re-implement these methods.
+    - beSigned() logic is the same for all forms — no need to override.
+    - Only execute() should be pure virtual (it's the one that differs).
+
+  Should be:
+      int getGradeToExecute() const;
+      int getGradeToSign() const;
+      std::string getName() const;
+      bool isitSigned() const;
+      void beSigned(const Bureaucrat& b);
+      virtual void execute(Bureaucrat const & executor) const = 0;
+
+  The "= 0" on execute() is what makes AForm abstract, not the getters.
+
+--------------------------------------------------------------------------
+
+[BUG 3] AForm.hpp — Missing execute() pure virtual method
+--------------------------------------------------------------------------
+  The whole point of making AForm abstract is the execute() method.
+  Each concrete form overrides execute() with different behavior.
+
+  Add to the public section:
+      virtual void execute(Bureaucrat const & executor) const = 0;
+
+  Also add a protected helper to check execution requirements:
+      void checkExecutionRequirements(Bureaucrat const & executor) const;
+
+  This helper checks: (1) form is signed, (2) executor grade is high enough.
+  All three concrete classes call it at the start of their execute().
+
+--------------------------------------------------------------------------
+
+[BUG 4] AForm.hpp — Destructor is not virtual
+--------------------------------------------------------------------------
+  Your code:
+      ~AForm();
+
+  Should be:
+      virtual ~AForm();
+
+  RULE: If a class has virtual methods, its destructor MUST be virtual.
+  Without this, deleting a derived object through an AForm* pointer
+  won't call the derived destructor → memory leak / undefined behavior.
+
+--------------------------------------------------------------------------
+
+[BUG 5] Bureaucrat — Missing executeForm() method
+--------------------------------------------------------------------------
+  The subject requires Bureaucrat to have:
+      void executeForm(AForm const & form);
+
+  This method should:
+    1. Try to call form.execute(*this)
+    2. On success: print "<name> executed <form name>"
+    3. On exception: print "<name> couldn't execute <form name> because <reason>"
+
+  Add declaration to Bureaucrat.hpp and implementation in Bureaucrat.cpp.
+
+--------------------------------------------------------------------------
+
+[BUG 6] Bureaucrat::signaAForm — Missing exception handling
+--------------------------------------------------------------------------
+  Your code:
+      void Bureaucrat::signaAForm(AForm& f){
+          f.beSigned(*this);
+          if (f.isitSigned())
+              std::cout << name << " signed " << f.getName() << std::endl;
       }
 
-  Same fix for GradeTooHighException.
+  PROBLEM: If beSigned() throws, there's no catch block — the exception
+  propagates up unhandled. The subject says signForm should print a failure
+  message, not crash.
+
+  Should be:
+      void Bureaucrat::signForm(AForm& f){
+          try {
+              f.beSigned(*this);
+              std::cout << name << " signed " << f.getName() << std::endl;
+          } catch (std::exception& e) {
+              std::cout << name << " couldn't sign " << f.getName()
+                        << " because " << e.what() << std::endl;
+          }
+      }
 
 --------------------------------------------------------------------------
 
-[BUG 3] operator<< for Form — doesn't show useful info
+[BUG 7] Bureaucrat copy constructor — Useless self-check (same as ex00/ex01)
 --------------------------------------------------------------------------
-  Your code:
-      os << b.getName() << " Has Signed a form\n";
+  Still has:
+      if (&other != this){ this->grade = other.getGrade(); }
 
-  This doesn't match the subject. operator<< should print ALL the form info:
-      Form <name>, signed: yes/no, grade to sign: <X>, grade to execute: <Y>
-
-  The operator<< is for DISPLAYING the form's state, not for saying
-  someone signed it. That's signForm()'s job.
+  Clean version:
+      Bureaucrat::Bureaucrat(const Bureaucrat& other)
+          : name(other.name), grade(other.grade) {}
 
 --------------------------------------------------------------------------
 
-[BUG 4] Bureaucrat increment/decrement still have old bugs
---------------------------------------------------------------------------
-  Your ex01/Bureaucrat.cpp still has the WRONG increment/decrement logic
-  from the original code (double checks). You fixed it in ex00 but didn't
-  carry the fix over to ex01.
+================================================================================
+                    MISSING FILES — NEED TO CREATE
+================================================================================
 
-  incrementGrade() should only check: if (grade <= 1) throw TooHigh; grade--;
-  decrementGrade() should only check: if (grade >= 150) throw TooLow; grade++;
-
+[MISSING 1] ShrubberyCreationForm.hpp / .cpp
 --------------------------------------------------------------------------
-
-[BUG 5] Bureaucrat operator<< — same typo "gureaucrat"
---------------------------------------------------------------------------
-  Copy your fixed version from ex00 (but still has "gureaucrat" there too).
-  Should be: ", bureaucrat grade "
+  - Inherits from AForm
+  - Constructor takes std::string target
+  - Grades: sign 145, exec 137
+  - execute(): creates file "<target>_shrubbery" and writes ASCII trees in it
+  - Must #include <fstream> for file writing
 
 --------------------------------------------------------------------------
 
-[BUG 6] Bureaucrat copy constructor — same self-check issue
+[MISSING 2] RobotomyRequestForm.hpp / .cpp
 --------------------------------------------------------------------------
-  Same as ex00: the self-check (&other != this) is pointless in a copy
-  constructor. And you should initialize grade in the initializer list too.
+  - Inherits from AForm
+  - Constructor takes std::string target
+  - Grades: sign 72, exec 45
+  - execute(): makes drilling noises, then 50% of the time says
+    "<target> has been robotomized successfully", otherwise says
+    "the robotomy failed"
+  - Use rand() or similar for the 50% chance
 
 --------------------------------------------------------------------------
 
-[BUG 7] Default Form constructor initializes gradeToSign/Execute to 0
+[MISSING 3] PresidentialPardonForm.hpp / .cpp
 --------------------------------------------------------------------------
-  Your code:
-      Form::Form() : gradeToExecute(0), gradeToSign(0)
-
-  But 0 is an INVALID grade (valid range is 1-150). If you need a default
-  constructor, use grade 150 (lowest valid) or throw. Having 0 means you
-  create an object that violates your own rules.
+  - Inherits from AForm
+  - Constructor takes std::string target
+  - Grades: sign 25, exec 5
+  - execute(): prints "<target> has been pardoned by Zaphod Beeblebrox"
 
 --------------------------------------------------------------------------
 
@@ -145,66 +186,73 @@ GRADE SYSTEM REMINDER:
                      ALREADY DONE (good job!)
 ================================================================================
 
-  [DONE] Form has correct 4 private attributes (removed extra "grade")
-  [DONE] const std::string name in Form.hpp
-  [DONE] Constructor takes correct parameters (name, gradeToSign, gradeToExecute)
-  [DONE] Constructor validates gradeToSign and gradeToExecute
-  [DONE] isSigned starts as false (not a parameter)
-  [DONE] Copy constructor uses initializer list with other's values
-  [DONE] beSigned() implemented correctly
-  [DONE] signaForm() implemented on Bureaucrat
-  [DONE] All getters implemented
+  [DONE] AForm class created with correct private attributes
+  [DONE] AForm parameterized constructor validates grades
+  [DONE] AForm copy constructor uses initializer list correctly
+  [DONE] AForm operator= handles isSigned
+  [DONE] AForm exception classes defined and what() returns strings
+  [DONE] AForm beSigned() logic is correct
+  [DONE] Bureaucrat forward declaration in Bureaucrat.hpp (no circular include)
+  [DONE] Bureaucrat increment/decrement fixed from ex00/ex01
+  [DONE] Bureaucrat operator<< typo fixed (says "bureaucrat" now)
 
 ================================================================================
                          WHAT STILL NEEDS TO BE DONE
 ================================================================================
 
-[ ] Fix circular include: Bureaucrat.hpp → use "class Form;" instead of #include
-[ ] Fix what() methods: RETURN a string, don't cout
-[ ] Add throw() specifier to what() methods (C++98 requirement)
-[ ] Fix operator<< for Form: print all form info, not just "has signed"
-[ ] Copy Bureaucrat fixes from ex00 (increment/decrement, operator<<, copy ctor)
-[ ] Fix default Form constructor (don't use 0 for grades)
-[ ] Write a thorough main.cpp that tests:
-      - Create a Form with valid grades
-      - Create a Form with grade 0 (should throw TooHigh)
-      - Create a Form with grade 151 (should throw TooLow)
-      - Bureaucrat with grade 1 signs a form requiring grade 50 (should work)
-      - Bureaucrat with grade 100 tries to sign form requiring grade 50 (should fail)
-      - Print form info before and after signing
+[ ] Fix include guard: FORM_HPP → AFORM_HPP
+[ ] Remove "= 0" from getters and beSigned (keep only execute() pure virtual)
+[ ] Add virtual destructor to AForm
+[ ] Add execute() pure virtual to AForm
+[ ] Add checkExecutionRequirements() helper to AForm (protected)
+[ ] Create ShrubberyCreationForm (.hpp + .cpp)
+[ ] Create RobotomyRequestForm (.hpp + .cpp)
+[ ] Create PresidentialPardonForm (.hpp + .cpp)
+[ ] Add executeForm() to Bureaucrat
+[ ] Fix signaAForm → signForm + add try/catch
+[ ] Fix Bureaucrat copy constructor (remove useless self-check)
+[ ] Update Makefile to compile all new files
+[ ] Write thorough main.cpp that tests:
+      - Create all 3 form types
+      - Try executing unsigned form (should fail)
+      - Sign a form then execute it (should succeed)
+      - Try executing with insufficient grade (should fail)
+      - Test ShrubberyCreationForm creates the file
+      - Test RobotomyRequestForm 50% behavior
+      - Test PresidentialPardonForm output
       - EACH test in its OWN try/catch
 
 ================================================================================
                             TRAPS / PITFALLS
 ================================================================================
 
-  TRAP 1: Circular includes (THIS IS WHAT BROKE YOUR BUILD)
-    Form.hpp needs Bureaucrat → keep #include "Bureaucrat.hpp"
-    Bureaucrat.hpp needs Form → use forward declaration "class Form;"
-    RULE: use forward declaration when you only need a reference/pointer.
+  TRAP 1: Pure virtual vs regular virtual
+    "= 0" means the method MUST be overridden by derived classes.
+    Only put "= 0" on methods that genuinely differ per form (execute).
+    Getters that access base class data should NOT be pure virtual.
 
-  TRAP 2: what() must RETURN, not print
-    The what() method returns a string. The CALLER prints it.
-    If you cout inside what(), you break the catch block's logic.
-    e.what() is called inside the catch → the catch decides how to display.
+  TRAP 2: Virtual destructor is MANDATORY
+    Any class with virtual methods needs a virtual destructor.
+    Without it: AForm* f = new ShrubberyCreationForm("home");
+    delete f; → only calls ~AForm(), not ~ShrubberyCreationForm() → LEAK.
 
-  TRAP 3: throw() specifier in C++98
-    In C++98, exception methods need: const char* what() const throw();
-    This tells the compiler "this function promises not to throw."
-    Without it, some compilers give warnings/errors with -Werror.
+  TRAP 3: execute() must check TWO things before running
+    1. Is the form signed? If not → throw
+    2. Is the executor's grade high enough? If not → throw
+    Put this in a shared helper so all 3 forms use the same check.
 
-  TRAP 4: signForm message format
-    Subject says:
-      Success: "<bureaucrat> signed <form>"
-      Failure: "<bureaucrat> couldn't sign <form> because <reason>"
-    Your version says "failed to sign" — that's fine but check the subject
-    wording for your school's correction.
+  TRAP 4: ShrubberyCreationForm file writing
+    The file name is "<target>_shrubbery" (no extension).
+    Use std::ofstream. Check if the file opened before writing.
 
-  TRAP 5: beSigned checks <=, not <
-    Grade 50 bureaucrat CAN sign a form with gradeToSign 50.
-    You got this right — just don't accidentally change it.
+  TRAP 5: Concrete forms pass their grades to AForm constructor
+    Each concrete class calls AForm(name, gradeToSign, gradeToExecute)
+    in its initializer list. The grades are HARD-CODED per class:
+      ShrubberyCreationForm("Shrubbery Creation", 145, 137)
+      RobotomyRequestForm("Robotomy Request", 72, 45)
+      PresidentialPardonForm("Presidential Pardon", 25, 5)
 
-  TRAP 6: operator= for Form
-    You don't have one declared. Since all const members can't be assigned,
-    you might want to either declare it private or just not implement it.
-    The compiler-generated one won't work with const members.
+  TRAP 6: const in execute() signature
+    execute(Bureaucrat const & executor) const — the method is CONST.
+    This means execute() cannot modify the form's state.
+    This is fine because execute() only reads isSigned and grades.

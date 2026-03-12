@@ -1,5 +1,5 @@
-#include "Form.hpp"
 #include "Bureaucrat.hpp"
+#include "Form.hpp"
 
 Bureaucrat::Bureaucrat() {
     std::cout << "default constructor called\n";
@@ -70,7 +70,12 @@ std::ostream& operator<<(std::ostream& os, const Bureaucrat& b){
 
 void Bureaucrat::signaForm(Form& f){
     f.beSigned(*this);
-    if (f.isitSigned())
+    try {
+        f.isitSigned();
         std::cout << name << " signed " << f.getName() << std::endl;
+    }
+    catch (std::exception& e){
+        std::cerr << e.what() << std::endl;
+    }
 }
 

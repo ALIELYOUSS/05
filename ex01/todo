@@ -159,13 +159,13 @@ GRADE SYSTEM REMINDER:
                          WHAT STILL NEEDS TO BE DONE
 ================================================================================
 
-[ ] Fix circular include: Bureaucrat.hpp → use "class Form;" instead of #include
-[ ] Fix what() methods: RETURN a string, don't cout
-[ ] Add throw() specifier to what() methods (C++98 requirement)
-[ ] Fix operator<< for Form: print all form info, not just "has signed"
-[ ] Copy Bureaucrat fixes from ex00 (increment/decrement, operator<<, copy ctor)
-[ ] Fix default Form constructor (don't use 0 for grades)
-[ ] Write a thorough main.cpp that tests:
+[x ] Fix circular include: Bureaucrat.hpp → use "class Form;" instead of #include
+[ x] Fix what() methods: RETURN a string, don't cout
+[ x] Add throw() specifier to what() methods (C++98 requirement)
+[ x] Fix operator<< for Form: print all form info, not just "has signed"
+[ x] Copy Bureaucrat fixes from ex00 (increment/decrement, operator<<, copy ctor)
+[ x] Fix default Form constructor (don't use 0 for grades)
+[ x] Write a thorough main.cpp that tests:
       - Create a Form with valid grades
       - Create a Form with grade 0 (should throw TooHigh)
       - Create a Form with grade 151 (should throw TooLow)
