@@ -1,10 +1,10 @@
 #include "ShrubberyCreationForm.hpp"
 
-ShrubberyCreationForm::ShrubberyCreationForm() : target("default"), AForm("ShrubberyCreationForm", 147, 137){
+ShrubberyCreationForm::ShrubberyCreationForm() : AForm("ShrubberyCreationForm", 147, 137), target("default"){
     std::cout << "ShrubberyCrationForm default constructor called\n";
 }
 
-ShrubberyCreationForm::ShrubberyCreationForm(std::string t) : target(t), AForm("ShrubberyCreationForm", 147, 137){
+ShrubberyCreationForm::ShrubberyCreationForm(std::string t) : AForm("ShrubberyCreationForm", 147, 137), target(t){
     std::cout << "ShrubberyCrationForm constructor called\n";
 }
 
@@ -27,7 +27,8 @@ ShrubberyCreationForm& ShrubberyCreationForm::operator=(const ShrubberyCreationF
 
 void  ShrubberyCreationForm::execute(Bureaucrat const &executor) const{
     checkExecutionRequirements(executor);
-    std::ofstream file(target + "_shrubbery");
+    std::string filename = target + "_shrubbery";
+    std::ofstream file(filename.c_str());
     if (!file.is_open())
         throw std::runtime_error("Failed to create shrubbery file\n");
     file << "     *     \n";

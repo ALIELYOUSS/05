@@ -4,8 +4,12 @@
 int main(){
     try
     {
-        Bureaucrat op("ilegal bureaucrat", 1);
-        ShrubberyCreationForm po;
+        Bureaucrat b("John", 40);
+        ShrubberyCreationForm form("building");
+        b.signForm(form);
+        b.executeForm(form);
+
+
     }
     catch(const std::exception& e)
     {

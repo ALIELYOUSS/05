@@ -4,7 +4,7 @@ OBJS = $(FILES:.cpp=.o)
 
 CC = c++
 
-NAME = Form
+NAME = AForm
 
 CPP_FLAGS = -Wall -Wextra -Werror -std=c++98
 

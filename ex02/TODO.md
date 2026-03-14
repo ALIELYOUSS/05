@@ -45,25 +45,25 @@ Why this is correct:
   - print failure line with exception reason if exception thrown
 
 ## 5) Makefile and build hygiene
-- [ ] In Makefile, include all required cpp files in FILES:
+- [ x] In Makefile, include all required cpp files in FILES:
   - main.cpp
   - Bureaucrat.cpp
   - AForm.cpp
   - ShrubberyCreationForm.cpp
   - RobotomyRequestForm.cpp
   - PresidentialPardonForm.cpp
-- [ ] Run make re and confirm zero warnings/errors under -Werror.
+- [ x] Run make re and confirm zero warnings/errors under -Werror.
 
 ## 6) main.cpp test checklist (run in this order)
-- [ ] Test A unsigned execute failure:
+- [x ] Test A unsigned execute failure:
   - create form
   - call executeForm without signing
   - expect FormNotSignedException path
-- [ ] Test B low-grade execute failure:
+- [x ] Test B low-grade execute failure:
   - sign form with high-rank bureaucrat
   - execute using low-rank bureaucrat
   - expect GradeTooLowException path
-- [ ] Test C success execution:
+- [ x] Test C success execution:
   - sign and execute with valid grades
   - verify output/file side effect
 - [ ] Test D run all 3 forms:
@@ -72,5 +72,5 @@ Why this is correct:
   - Presidential prints pardon message
 
 ## 7) Done criteria
-- [ ] make re succeeds.
+- [x ] make re succeeds.
 - [ ] All four tests above run and show expected behavior.

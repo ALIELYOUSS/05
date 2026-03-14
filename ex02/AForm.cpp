@@ -52,6 +52,14 @@ const char *AForm::FormSignedException::what() const throw(){
     return "AForm is signed\n";
 }
 
+const char *AForm::GradeTooLowException::what() const throw(){
+    return "Form grade to sign or to execute too low\n";
+}
+
+const char *AForm::GradeTooHighException::what() const throw(){
+    return "Form grade to sign or to execute too high\n";
+}
+
 std::ostream& operator<<(std::ostream& os, const AForm& b){
     os << b.getName() << " is the AForm signed " << b.isitSigned() << " the AForm s execution grade " << b.getGradeToExecute() << " AForms sign grade " << b.getGradeToSign() << "\n";
     return os;
