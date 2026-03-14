@@ -1,10 +1,11 @@
 #include "Bureaucrat.hpp"
-#include "AForm.hpp"
+#include "ShrubberyCreationForm.hpp"
 
 int main(){
     try
     {
         Bureaucrat op("ilegal bureaucrat", 1);
+        ShrubberyCreationForm po;
     }
     catch(const std::exception& e)
     {

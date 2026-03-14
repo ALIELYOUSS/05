@@ -1,4 +1,4 @@
-FILES = main.cpp AForm.cpp Bureaucrat.cpp 
+FILES = main.cpp Bureaucrat.cpp AForm.cpp ShrubberyCreationForm.cpp RobotomyRequestForm.cpp  PresidentialPardonForm.cpp
 
 OBJS = $(FILES:.cpp=.o)
 
@@ -10,7 +10,7 @@ CPP_FLAGS = -Wall -Wextra -Werror -std=c++98
 
 all: $(NAME)
 
-%.o: %.cpp Bureaucrat.hpp AForm.hpp
+%.o: %.cpp Bureaucrat.hpp AForm.hpp ShrubberyCreationForm.hpp RobotomyRequestForm.hpp PresidentialPardonForm.hpp
 	$(CC) $(CPP_FLAGS) -c $< -o $@
 
 $(NAME): $(OBJS)

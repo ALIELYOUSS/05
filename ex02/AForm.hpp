@@ -22,6 +22,14 @@ public:
         public:
             virtual const char* what() const throw();
     };
+        class FormNotSignedException : public std::exception{
+        public:
+            virtual const char* what() const throw();
+    };
+    class FormSignedException : public std::exception{
+        public:
+            virtual const char* what() const throw();
+    };
     AForm();
     AForm(std::string n, int gs, int ge);
     AForm(const AForm& other);
@@ -32,8 +40,8 @@ public:
     std::string getName() const;
     bool isitSigned() const;
     void beSigned(const Bureaucrat& b);
-    void checkExecutionRequirements(Bureaucrat const & executor) const;
-    virtual void execute(Bureaucrat const & executor) const = 0;
+    void checkExecutionRequirements(const Bureaucrat& executor) const;
+    virtual void execute(Bureaucrat const &executor) const = 0;
 };
 std::ostream& operator<<(std::ostream& os, const AForm& b);
 

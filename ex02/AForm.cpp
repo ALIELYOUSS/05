@@ -12,9 +12,9 @@ AForm::AForm(std::string n, int gs, int ge) : name(n), isSigned(false), gradeToS
     gradeToExecute(ge){
     std::cout << "AForm param constructor called\n";
     if (gradeToExecute < 1 || gradeToSign < 1)
-        throw GradeTooHighException();
+        throw FormSignedException();
     if (gradeToExecute > 150 || gradeToSign > 150)
-        throw GradeTooLowException();
+        throw FormNotSignedException();
 }
 
 AForm::AForm(const AForm& other) : name(other.name), isSigned(other.isSigned),
@@ -44,12 +44,12 @@ bool AForm::isitSigned() const{
     return isSigned;
 }
 
-const char *AForm::GradeTooLowException::what() const throw(){
-    return "AForm grade to sign or to execute too low\n";
+const char *AForm::FormNotSignedException::what() const throw(){
+    return "AForm is not signed\n";
 }
 
-const char *AForm::GradeTooHighException::what() const throw(){
-    return "AForm grade to sign or to execute too high\n";
+const char *AForm::FormSignedException::what() const throw(){
+    return "AForm is signed\n";
 }
 
 std::ostream& operator<<(std::ostream& os, const AForm& b){
@@ -61,5 +61,12 @@ void AForm::beSigned(const Bureaucrat& b){
     if (b.getGrade() <= gradeToSign)
         this->isSigned = true;
     else
-        throw AForm::GradeTooLowException();
+        throw AForm::FormNotSignedException();
 }
+
+void    AForm::checkExecutionRequirements(const Bureaucrat& executor) const{
+    if (!isitSigned())
+        throw FormNotSignedException();
+    if (executor.getGrade() > gradeToExecute)
+        throw GradeTooLowException();
+};
