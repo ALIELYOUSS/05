@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <exception>
+#include <string>
 
-#include "Bureaucrat.hpp"
+class Bureaucrat;
 
 class Form
 {

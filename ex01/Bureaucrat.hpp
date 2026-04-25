@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <exception>
+#include <string>
 
 class Form;
 
@@ -24,11 +25,11 @@ public:
     ~Bureaucrat();
     Bureaucrat& operator=(const Bureaucrat& other);
     Bureaucrat(const Bureaucrat& other);
-    const std::string getName() const;
+    const std::string& getName() const;
     int getGrade() const;
     void incrementGrade();
     void decrementGrade();
-    void signaForm(Form& f);
+    void signForm(Form& f);
 };
 
 std::ostream& operator<<(std::ostream& os, const Bureaucrat& b);

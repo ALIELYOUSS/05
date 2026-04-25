@@ -1,16 +1,14 @@
 #include "Form.hpp"
+#include "Bureaucrat.hpp"
 
 Form::Form() : name("ali"), isSigned(false), gradeToSign(150), gradeToExecute(150){
-    std::cout << "Form constructor called\n"; 
 }
 
 Form::~Form(){
-    std::cout << "Form destructor called\n";
 }
 
 Form::Form(std::string n, int gs, int ge) : name(n), isSigned(false), gradeToSign(gs),
     gradeToExecute(ge){
-    std::cout << "Form param constructor called\n";
     if (gradeToExecute < 1 || gradeToSign < 1)
         throw GradeTooHighException();
     if (gradeToExecute > 150 || gradeToSign > 150)
@@ -19,7 +17,6 @@ Form::Form(std::string n, int gs, int ge) : name(n), isSigned(false), gradeToSig
 
 Form::Form(const Form& other) : name(other.name), isSigned(other.isSigned),
     gradeToSign(other.gradeToSign), gradeToExecute(other.gradeToExecute){
-    std::cout << "copy constructor called\n";
 }
 
 Form& Form::operator=(const Form &other){
@@ -45,15 +42,17 @@ bool Form::isitSigned() const{
 }
 
 const char *Form::GradeTooLowException::what() const throw(){
-    return "Form grade to sign or to execute too low\n";
+    return "Form grade too low";
 }
 
 const char *Form::GradeTooHighException::what() const throw(){
-    return "Form grade to sign or to execute too high\n";
+    return "Form grade too high";
 }
 
 std::ostream& operator<<(std::ostream& os, const Form& b){
-    os << b.getName() << " is the form signed " << b.isitSigned() << " the form s execution grade " << b.getGradeToExecute() << " forms sign grade " << b.getGradeToSign() << "\n";
+    os << b.getName() << ", form signed: " << (b.isitSigned() ? "yes" : "no")
+       << ", sign grade " << b.getGradeToSign()
+       << ", execute grade " << b.getGradeToExecute() << ".";
     return os;
 }
 

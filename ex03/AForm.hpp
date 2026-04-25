@@ -3,8 +3,9 @@
 
 #include <iostream>
 #include <exception>
+#include <string>
 
-#include "Bureaucrat.hpp"
+class Bureaucrat;
 
 class AForm
 {
@@ -23,10 +24,6 @@ public:
             virtual const char* what() const throw();
     };
         class FormNotSignedException : public std::exception{
-        public:
-            virtual const char* what() const throw();
-    };
-    class FormSignedException : public std::exception{
         public:
             virtual const char* what() const throw();
     };
